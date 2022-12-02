@@ -7,8 +7,6 @@
 # X = Rock, Y = Paper, Z = Scissors
 # A = Rock, B = Paper, C = Scissors
 
-[:rock, :paper, :scissors]
-
 def calculate_total_score_of_two_throws(file = 'd2.txt')
   my_score = 0
   File.read(file).each_line.map do
@@ -59,4 +57,31 @@ def decode_throw(throw)
   throws[throw]
 end
 
+
+# I'm taking a different approach. I'm letting each throw have a numeric value 0-2 and representing the outcome
+# as the result of Throw1 - Throw2. If I choose the values carefully, I can get the desired throw based on the
+# outcome from modulo addition. Everything else is a mapping problem.
+def part2(file = 'd2.txt')
+  throws = %i[rock paper scissors]
+  outcomes = {'X' => :lose, 'Y' => :draw, 'Z' => :win }
+  throw_index_map = { 'A' => 0, 'B' => 1, 'C' => 2 }
+
+  # Based on the results of My_throw_index minus your_throw_index mod 3
+  outcome_value_map = { 'X' => -1, 'Y' => 0, 'Z' => 1 }
+
+  my_score = 0
+  File.read(file).each_line.map do
+    elf_throw, desired_outcome = _1.split
+    elf_index = throw_index_map[elf_throw]
+    outcome_value = outcome_value_map[desired_outcome]
+    outcome = outcomes[desired_outcome]
+    my_throw_index = (elf_index + outcome_value) % 3
+    my_throw = throws[my_throw_index]
+    my_score += get_outcome_score(outcome) + get_throw_score(my_throw)
+  end
+
+  puts my_score
+end
+
 calculate_total_score_of_two_throws
+part2
