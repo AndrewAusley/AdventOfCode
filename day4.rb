@@ -31,6 +31,8 @@ end
 def range_redundancy?(ranges)
   wide = ranges[0]
   narrow = ranges[1]
+  # The expectation is that they ARE NOT redundant, using negative logic allows us to do fewer checks
+  # as it will return as soon as either condition is true.
   narrow[0] < wide[0] || narrow[1] > wide[1] ? 0 : 1
 end
 
