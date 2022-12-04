@@ -53,21 +53,9 @@ def evaluate_compartments(file = 'd3.txt')
 end
 
 def evaluate_groups(file = 'd3.txt')
-  line_count = 0
-  three_lines = []
-  File.read(file).each_line.sum do |line|
-    # Build up a group of elves (3 lines)
-    three_lines[line_count % 3] = line.strip
-    line_count += 1
-
-    # Once the group is formed, find the intersection and score it.
-    if line_count % 3 == 0
-      item = find_intersection(three_lines)
-      three_lines = []
-      score_item(item)
-    else
-      0
-    end
+  File.read(file).lines.each_slice(3).sum do |lines|
+    item = find_intersection(lines)
+    score_item(item)
   end
 end
 
