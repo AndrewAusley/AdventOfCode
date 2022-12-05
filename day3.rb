@@ -8,11 +8,11 @@
 def find_duplicate_items(line)
   book = {}
   line = line.strip
-  line[0..(line.length / 2 - 1)].split('').each do |letter|
+  line[0..(line.length / 2 - 1)].each_char do |letter|
     book.store(letter, true)
   end
 
-  line[(line.length / 2)..].split('').map do |letter|
+  line[(line.length / 2)..].each_char.map do |letter|
     next unless book.include?(letter)
 
     book.delete(letter)
