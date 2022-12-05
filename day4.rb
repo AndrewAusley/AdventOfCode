@@ -39,7 +39,7 @@ end
 def range_overlap?(ranges)
   wide = ranges[0]
   narrow = ranges[1]
-  num_in_range?(wide, narrow[0]) || num_in_range?(wide, narrow[1]) ? 1 : 0
+  narrow[0].between?(wide[0], wide[1]) || narrow[1].between?(wide[0], wide[1]) ? 1 : 0
 end
 
 def num_in_range?(range, num)
