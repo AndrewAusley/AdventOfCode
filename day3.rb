@@ -22,27 +22,15 @@ end
 
 # This function takes a letter to be scored.
 def score_item(item)
-  if item.ord >= 97
-    item.ord - 96
+  if item.ord >= 'a'.ord
+    item.ord - ('a'.ord - 1)
   else
-    item.ord - 38
+    item.ord - ('A'.ord - 26 - 1)
   end
 end
 
 def find_intersection(three_lines)
-  book = {}
-  three_lines[0].split('').each do |letter|
-    book.store(letter, true)
-  end
-
-  next_book = {}
-  three_lines[1].split('').each do |letter|
-    next_book.store(letter, true) if book.include? letter
-  end
-
-  three_lines[2].split('').each do |letter|
-    return letter if next_book.include? letter
-  end
+  (three_lines[0].strip.chars & three_lines[1].strip.chars & three_lines[2].strip.chars)[0]
 end
 
 def evaluate_compartments(file = 'd3.txt')
