@@ -7,7 +7,7 @@ def find_packet_indicator(window_size, file = 'd6.txt')
   count = 0
   File.read(file).each_char.each_cons(window_size) do |buffer|
     count += 1
-    return count + window_size - 1 if (buffer & buffer) == buffer
+    return count + window_size - 1 if (buffer & buffer).size == buffer.size
   end
   raise 'No package indicatior found!'
 end
