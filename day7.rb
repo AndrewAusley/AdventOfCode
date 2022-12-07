@@ -11,10 +11,11 @@
 # Node will exist, switch current_node pointer to that from Graph hash
 # If cd ..
 # Switch current node pointer to parent of current node pointer
-# Create rollup of sizes (TODO: if none of the children sizes are nil?)
+# Create rollup of sizes (if none of the children sizes are nil?) Hindsight: handle directory sizes at the end
 # If ls
 # Create any non-existent nodes as children of current node pointer
 # TODO: Are directories uniquely named?
+# Hindsight: Doesn't matter since I didn't use a graph with an array/hash of all nodes
 #
 class Node
   attr_accessor :parent, :name, :children, :type, :size
@@ -37,19 +38,6 @@ class Node
   end
 end
 
-class Graph
-  attr_accessor :nodes
-
-  def initialize(node = nil)
-    @nodes = {}
-    @nodes.store(node.name, node) unless node.nil?
-  end
-
-  def add_node(node)
-    @nodes.store node.name, node
-  end
-end
-
 def parse_input(file = 'd7.txt')
   $root = Node.new(nil, '/', :dir)
   current_dir = $root
@@ -65,15 +53,6 @@ def parse_input(file = 'd7.txt')
   end
 end
 
-def get_size(node)
-  size = 0
-  node.children.each do |_name, child|
-    return nil if child.size.nil?
-
-    size += child.size
-  end
-end
-
 def parse_command(vars, current_dir)
   return current_dir if vars[1] == 'ls'
 
@@ -82,8 +61,7 @@ def parse_command(vars, current_dir)
     # Jump to the beginning
     $root
   when '..'
-    # Try to calculate size, jump to parent
-    current_dir.size = get_size(current_dir)
+    # Back up to the parent node
     current_dir.parent.nil? ? current_dir : current_dir.parent
   else
     # See if the child node exists, else create it and link it.
@@ -105,5 +83,52 @@ def parse_node(vars, current_dir)
   end
 end
 
+def set_dir_sizes(node = $root, sum = 0)
+  if node.children.empty? && node.size.nil?
+    node.size = 0
+  elsif node.size.nil?
+    node.size = node.children.map.sum do |_name, child|
+      sum = set_dir_sizes(child, sum) if child.type == :dir
+
+      child.size
+    end
+    if node.size <= 100000
+      sum += node.size
+    end
+    $dir_space.store node.name, node.size
+  end
+  sum
+end
+
+# Could have been implemented as a Graph class
+$dir_space = {}
 
 parse_input
+puts "The sum of directories smaller than 100,000 is: #{set_dir_sizes}"
+puts 'The total system memory is 70,000,000'
+puts "The total space used on our system is #{$root.size}"
+puts 'We need at least 30,000,000 free memory'
+free_space = 70000000 - $root.size
+puts "We have #{free_space} free space."
+needed_space = 30000000 - free_space
+puts "We need to free up at least #{needed_space}"
+
+current_delete_space = $root.size
+current_delete_name = $root.name
+next_smallest_value = 0
+next_smallest_name = ''
+
+$dir_space.each do|key, value|
+  if value >= needed_space && value < current_delete_space
+    current_delete_space = value
+    current_delete_name = key
+  elsif value > next_smallest_value && value <= needed_space
+    next_smallest_value = value
+    next_smallest_name = key
+  end
+end
+
+puts "The best directory to delete is: #{current_delete_name} : #{current_delete_space}"
+puts "The next smallest directory is: #{next_smallest_name} : #{next_smallest_value}"
+
+puts $dir_space.map {|k,v|v}.sort
