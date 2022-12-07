@@ -4,12 +4,10 @@
 # Read 4 characters into a buffer, shift one off, push one on, keep a counter
 
 def find_packet_indicator(window_size, file = 'd6.txt')
-  count = 0
-  File.read(file).each_char.each_cons(window_size) do |buffer|
-    count += 1
-    return count + window_size - 1 if (buffer & buffer).size == buffer.size
+  File.read(file).each_char.each_cons(window_size).with_index do |buffer, index|
+    return index + window_size if (buffer & buffer).size == buffer.size
   end
-  raise 'No package indicatior found!'
+  raise 'No package indicator found!'
 end
 # Part 1
 puts find_packet_indicator 4
