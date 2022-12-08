@@ -92,15 +92,10 @@ def parse_trees(file = 'd8.txt')
   puts find_treehouse_score lines_copy
 end
 
-
 def treehouse_score(input, row, col)
   limit = input.size - 1
   tree = input[row][col]
-  if (row == 37 && col == 25)
-    debug = true
-  else
-    debug = false
-  end
+
   north_count = 0
   north = []
   south = []
@@ -109,7 +104,7 @@ def treehouse_score(input, row, col)
   i = 1
   while row - i >= 0
     north_count += 1
-    north.unshift input[row - i][col] if debug
+
     if tree > input[row - i][col]
       i += 1
         else
@@ -121,7 +116,6 @@ def treehouse_score(input, row, col)
   i = 1
   while row + i <= limit
     south_count += 1
-    south.unshift input[row + i][col] if debug
     if tree > input[row + i][col]
       i += 1
         else
@@ -133,7 +127,6 @@ def treehouse_score(input, row, col)
   i = 1
   while col + i <= limit
     east_count += 1
-    east.unshift input[row][col + i] if debug
     if tree > input[row][col + i]
       i += 1
         else
@@ -145,7 +138,6 @@ def treehouse_score(input, row, col)
   i = 1
   while col - i >= 0
     west_count += 1
-    west.unshift input[row - i][col - i] if debug
     if tree > input[row][col - i]
       i += 1
     else
@@ -157,19 +149,84 @@ def treehouse_score(input, row, col)
   north_count * south_count * east_count * west_count
 end
 
-
 def find_treehouse_score(lines)
   scores = []
   (1..(lines.size - 2)).each do |row|
     (1..lines.size - 2).each do |col|
       tree_score = treehouse_score(lines, row, col)
-      if tree_score > 1
         scores.push tree_score
         puts "#{tree_score}, #{row}, #{col}"
-      end
     end
   end
   scores.max
 end
 
-parse_trees
+def read_file_to_array (file = 'd8.txt')
+  input = []
+  File.read(file).each_line do |line|
+    # Keep lines in memory because reading a file backwards is annoying.
+    input.push(line.strip.split('').map { _1.to_i })
+  end
+  input
+end
+
+def get_cartesian_array(input, row, col, direction = :north)
+  row_limit = input.size - 1
+  col_limit = input[0].size - 1
+
+  if row.zero? || col.zero? || row == row_limit || col == col_limit
+    return [-1]
+  end
+
+  case direction
+  when :north
+    input[0...row].map { _1[col] }.reverse
+  when :south
+    input[(row + 1)..row_limit].map { _1[col] }
+  when :east
+    input[row][(col + 1)..]
+  when :west
+    input[row][0...col].reverse
+  else
+    raise 'invalid direction!'
+  end
+end
+
+def solution2part1(file = 'd8.txt')
+  input = read_file_to_array file
+  dirs = %i[north south east west]
+  visible_count = 0
+  (0...input.size).each do |row|
+    (0...input.size).each do |col|
+      dirs.each do |dir|
+        if input[row][col] > get_cartesian_array(input, row, col, dir).max
+          visible_count += 1
+          break
+        end
+      end
+    end
+  end
+  visible_count
+end
+
+def solution2part2(file = 'd8.txt')
+  input = read_file_to_array file
+  dirs = %i[north south east west]
+  score_max = 0
+  (1...input.size-1).each do |row|
+    (1...input.size-1).each do |col|
+      score = 1
+      dirs.each do |dir|
+        tree = input[row][col]
+        arr = get_cartesian_array(input, row, col, dir)
+        distance = arr.each_index.select { |i| arr[i] >= tree }.first
+        score *= distance.nil? ? arr.size : distance + 1
+      end
+      score_max = score if score > score_max
+    end
+  end
+  score_max
+end
+
+puts solution2part1
+puts solution2part2
