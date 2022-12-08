@@ -100,59 +100,50 @@ def treehouse_score(input, row, col)
   north_count = 0
   i = 1
   while row - i >= 0
-    if tree > input[row - i][col]
-      north_count += 1
+    north_count += 1
+if tree > input[row - i][col]
       i += 1
     else
-      north_count += 1
       break
     end
   end
-  return 0 unless north_count.positive?
 
   south_count = 0
   i = 1
   while row + i <= limit
-    if tree > input[row + i][col]
-      south_count += 1
+    south_count += 1
+if tree > input[row + i][col]
       i += 1
     else
-      south_count += 1
       break
     end
   end
-  return 0 unless south_count.positive?
 
   east_count = 0
   i = 1
   while col + i <= limit
-    if tree > input[row][col + 1]
-      east_count += 1
+    east_count += 1
+if tree > input[row][col + 1]
       i += 1
     else
-      east_count += 1
       break
     end
   end
-  return 0 unless east_count.positive?
 
   west_count = 0
   i = 1
   while col - i >= 0
+    west_count += 1
     if tree > input[row][col - i]
-      west_count += 1
       i += 1
     else
-      west_count += 1
       break
     end
   end
-  return 0 unless west_count.positive?
+
 
   puts "#{north_count}, #{south_count}, #{east_count}, #{west_count}"
-  product = north_count* south_count*east_count*west_count
-  puts product
-  product
+  north_count * south_count * east_count * west_count
 end
 
 
@@ -161,7 +152,7 @@ def find_treehouse_score(lines)
   (1..(lines.size - 2)).each do |row|
     (1..lines.size - 2).each do |col|
       tree_score = treehouse_score(lines, row, col)
-      if tree_score.positive?
+      if tree_score > 1
         scores.push tree_score
         puts "#{tree_score}, #{row}, #{col}"
       end
