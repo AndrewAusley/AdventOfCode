@@ -54,8 +54,11 @@ def parse_trees(file = 'd8.txt')
 
   south_max = []
   east_max = []
+  south_visible = Array.new(99) { Array.new(99) }
+  east_visible = Array.new(99) { Array.new(99) }
 
   row_index = lines.size - 1
+  lines_copy = lines.clone
   # Iterate bottom to top, right to left
   until lines.empty?
     line = lines.pop
@@ -85,8 +88,86 @@ def parse_trees(file = 'd8.txt')
     end
     row_index -= 1
   end
-  visible_count
+  puts visible_count
+  puts find_treehouse_score lines_copy
 end
 
 
-puts parse_trees
+def treehouse_score(input, row, col)
+  limit = input.size - 1
+  tree = input[row][col]
+
+  north_count = 0
+  i = 1
+  while row - i >= 0
+    if tree > input[row - i][col]
+      north_count += 1
+      i += 1
+    else
+      north_count += 1
+      break
+    end
+  end
+  return 0 unless north_count.positive?
+
+  south_count = 0
+  i = 1
+  while row + i <= limit
+    if tree > input[row + i][col]
+      south_count += 1
+      i += 1
+    else
+      south_count += 1
+      break
+    end
+  end
+  return 0 unless south_count.positive?
+
+  east_count = 0
+  i = 1
+  while col + i <= limit
+    if tree > input[row][col + 1]
+      east_count += 1
+      i += 1
+    else
+      east_count += 1
+      break
+    end
+  end
+  return 0 unless east_count.positive?
+
+  west_count = 0
+  i = 1
+  while col - i >= 0
+    if tree > input[row][col - i]
+      west_count += 1
+      i += 1
+    else
+      west_count += 1
+      break
+    end
+  end
+  return 0 unless west_count.positive?
+
+  puts "#{north_count}, #{south_count}, #{east_count}, #{west_count}"
+  product = north_count* south_count*east_count*west_count
+  puts product
+  product
+end
+
+
+def find_treehouse_score(lines)
+  scores = []
+  (1..(lines.size - 2)).each do |row|
+    (1..lines.size - 2).each do |col|
+      tree_score = treehouse_score(lines, row, col)
+      if tree_score.positive?
+        scores.push tree_score
+        puts "#{tree_score}, #{row}, #{col}"
+      end
+    end
+  end
+  scores.max
+end
+
+parse_trees('test.txt')
