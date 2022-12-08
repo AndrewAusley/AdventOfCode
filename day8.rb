@@ -33,7 +33,7 @@ def parse_trees(file = 'd8.txt')
 
       # Check if there is a new max from the north, map it as visible.
       north_max[col_index] = if north_max[col_index].nil? || tree > north_max[col_index]
-        visible_count += 1 unless visible[row_index][col_index] == true
+                               visible_count += 1 unless visible[row_index][col_index] == true
         visible[row_index][col_index] = true
         north_visible[row_index][col_index] = true
         tree
@@ -42,7 +42,7 @@ def parse_trees(file = 'd8.txt')
       end
 
       west_max[row_index] = if west_max[row_index].nil? || tree > west_max[row_index]
-        visible_count += 1 unless visible[row_index][col_index] == true
+                              visible_count += 1 unless visible[row_index][col_index] == true
         visible[row_index][col_index] = true
         west_visible[row_index][col_index] = true
         tree
@@ -68,7 +68,7 @@ def parse_trees(file = 'd8.txt')
       tree = line[i]
       col_index = length + i
       south_max[col_index] = if south_max[col_index].nil? || tree > south_max[col_index]
-        visible_count += 1 unless visible[row_index][col_index] == true
+                               visible_count += 1 unless visible[row_index][col_index] == true
         visible[row_index][col_index] = true
         north_visible[row_index][col_index] = true
         tree
@@ -77,7 +77,7 @@ def parse_trees(file = 'd8.txt')
       end
 
       east_max[row_index] = if east_max[row_index].nil? || tree > east_max[row_index]
-        visible_count += 1 unless visible[row_index][col_index] == true
+                              visible_count += 1 unless visible[row_index][col_index] == true
         visible[row_index][col_index] = true
         west_visible[row_index][col_index] = true
         tree
@@ -96,51 +96,62 @@ end
 def treehouse_score(input, row, col)
   limit = input.size - 1
   tree = input[row][col]
-
+  if (row == 37 && col == 25)
+    debug = true
+  else
+    debug = false
+  end
   north_count = 0
+  north = []
+  south = []
+  east = []
+  west = []
   i = 1
   while row - i >= 0
     north_count += 1
-if tree > input[row - i][col]
+    north.unshift input[row - i][col] if debug
+    if tree > input[row - i][col]
       i += 1
-    else
-      break
-    end
+        else
+          break
+        end
   end
 
   south_count = 0
   i = 1
   while row + i <= limit
     south_count += 1
-if tree > input[row + i][col]
+    south.unshift input[row + i][col] if debug
+    if tree > input[row + i][col]
       i += 1
-    else
-      break
-    end
+        else
+          break
+        end
   end
 
   east_count = 0
   i = 1
   while col + i <= limit
     east_count += 1
-if tree > input[row][col + 1]
+    east.unshift input[row][col + i] if debug
+    if tree > input[row][col + i]
       i += 1
-    else
-      break
-    end
+        else
+          break
+        end
   end
 
   west_count = 0
   i = 1
   while col - i >= 0
     west_count += 1
+    west.unshift input[row - i][col - i] if debug
     if tree > input[row][col - i]
       i += 1
     else
       break
     end
   end
-
 
   puts "#{north_count}, #{south_count}, #{east_count}, #{west_count}"
   north_count * south_count * east_count * west_count
@@ -161,4 +172,4 @@ def find_treehouse_score(lines)
   scores.max
 end
 
-parse_trees('test.txt')
+parse_trees
