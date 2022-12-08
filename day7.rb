@@ -43,8 +43,7 @@ def parse_input(file = 'd7.txt')
   $root = Node.new(nil, '/', :dir)
   current_dir = $root
 
-  input = File.read file
-  input.each_line do |line|
+  File.read(file).each_line do |line|
     vars = line.strip.split ' '
     if vars[0] == '$'
       current_dir = parse_command(vars, current_dir)
