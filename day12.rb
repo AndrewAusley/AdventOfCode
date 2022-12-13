@@ -3,79 +3,69 @@
 # track of the number of steps it takes to reach each square. In a hashmap, we can store
 # the minimum number of steps it takes to reach each coordinate. If we reach a coordinate
 # that has already been visited and we haven't reached used fewer steps, that is an ending
-# condition. Each valid adjacent square can be scored as the score of the the lowest-scored
-# adjacent move plus one.
+# condition. We can advance to letters valued at one-higher or any lower letter.
 
-
-# Parse and progress is possible, but for simplicity, stick to parse and process.
+$debug = false
 def parse_input(file = 'd12.txt')
   $map = []
-  $score = { '0,0' => 0 }
-  $path = { '0,0' => nil }
+  start = []
   File.read(file).each_line.with_index do |line, index|
     $map[index] = line.strip.split('')
-  end
-  # A dirty, lazy hack
-  $map[0][0] = '`'
-  walk_map [0, 0]
-end
-
-# From is not strictly needed, but it will let us keep track of the path taken.
-def walk_map(coord, queue = [], from = [0, 0])
-  unless coord == [0, 0]
-    from_score = get_score from
-    to_score = get_score coord
-    return unless to_score.nil? || (to_score < from_score)
-
-    set_score coord, from_score + 1
-    set_path coord, from
-    if $map[coord[0]][coord[1]] == 'E'
-      puts "#{get_score coord}"
-      return
+    if start.empty?
+      col = $map[index].find_index('S')
+      start = [index, col] unless col.nil?
     end
   end
 
-  queue += get_valid_moves(coord)
-  until queue.empty?
-    to, from = queue.shift
-    walk_map(to, queue, from)
+  visited = {}
+  cost = {}
+
+  # seen = [cost, [x,y]]
+  seen = [[0, start]]
+
+  until seen.empty?
+    node_cost, visiting = seen.shift
+    if get_letter(visiting) == 'E'
+      puts "Final cost: #{node_cost}"
+      return
+    end
+
+    next if visited.include?("#{visiting[0]},#{visiting[1]}")
+    puts "#{visiting[0]}, #{visiting[1]} Letter: #{get_letter visiting} Cost: #{node_cost}" if $debug
+    visited.store("#{visiting[0]},#{visiting[1]}", true)
+    cost.store("#{visiting[0]},#{visiting[1]}", node_cost)
+    get_neighbors(visiting).each do |node|
+      total = node_cost + 1
+      seen.push([total, node])
+    end
+    # Sort not needed when cost is fixed
+    # seen.sort_by { |indv_cost, _node| indv_cost }
   end
-  test = 1
+
 end
 
-def get_valid_moves(coord)
-  initial = [[coord[0] + 1, coord[1]], [coord[0] - 1, coord[1]], [coord[0], coord[1] + 1], [coord[0], coord[1] - 1]]
-  candidates = initial.filter do |x, y|
-    x >= 0 && y >= 0 && x < $map.size && y < $map[0].size && (x != coord[0] || y != coord[1])
+def get_neighbors(node)
+  # Start with the 4 cardinal directions as options
+  initial = [[node[0] + 1, node[1]], [node[0] - 1, node[1]], [node[0], node[1] + 1], [node[0], node[1] - 1]]
+
+  # Ensure each direction is within the bounds
+  inbounds = initial.filter do |x, y|
+    x >= 0 && y >= 0 && x < $map.size && y < $map[0].size
   end
 
-  # Filter out invalid moves and map them to their from coord for BFS
-  candidates.filter { valid_move?([_1, _2], coord) }.map { |to| [to, coord] }
+  # Filter out anything that isn't the same letter, next letter, or if letter is 'z', the end
+  inbounds.filter do |e|
+    # Start / Stop conditions
+    if get_letter(node) == 'z' && get_letter(e) == 'E' || get_letter(node) == 'S' && get_letter(e) == 'a'
+      true
+    else
+      (get_letter(e).ord - get_letter(node).ord) <= 1
+    end
+  end
 end
 
-def valid_move?(to, from)
-  # If the next letter isn't one different or the same, not valid
-  return false unless ($map[to[0]][to[1]].ord - $map[from[0]][from[1]].ord).abs <= 1 || ($map[to[0]][to[1]] == 'E' && $map[from[0]][from[1]] == 'z')
-
-  # If the letters are valid and hasn't been visited, valid
-  to_score = get_score to
-  return true if to_score.nil?
-
-  # If the letters are valid, it has been visited, but this is a shorter path, valid
-  from_score = get_score from
-  (to_score - (from_score + 1)).positive?
-end
-
-def get_score(coord)
-  $score.fetch("#{coord[0]},#{coord[1]}", nil)
-end
-
-def set_score(coord, score)
-  $score.store("#{coord[0]},#{coord[1]}", score)
-end
-
-def set_path(coord, from_coord)
-  $path.store("#{coord[0]},#{coord[1]}", "#{from_coord[0]},#{from_coord[1]}")
+def get_letter(coord)
+  $map[coord[0]][coord[1]]
 end
 
 parse_input
