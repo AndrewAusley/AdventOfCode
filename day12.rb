@@ -53,15 +53,18 @@ def get_neighbors(node)
     x >= 0 && y >= 0 && x < $map.size && y < $map[0].size
   end
 
-  # Filter out anything that isn't the same letter, next letter, or if letter is 'z', the end
-  inbounds.filter do |e|
-    # Start / Stop conditions
-    if (get_letter(node) == 'z' && get_letter(e) == 'E') || (get_letter(node) == 'S' && get_letter(e) == 'a')
-      true
-    else
-      # If the next step is NOT 'E', the next letter can only be 1 higher or less.
-      get_letter(e) != 'E' && ((get_letter(e).ord - get_letter(node).ord) <= 1)
-    end
+  # Filter out anything that isn't height+1 or less
+  inbounds.filter { |e| (get_height(e) - get_height(node)) <= 1 }
+end
+
+def get_height(node)
+  case get_letter(node)
+  when 'E'
+    'z'.ord
+  when 'S'
+    'a'.ord
+  else
+    get_letter(node).ord
   end
 end
 
@@ -69,4 +72,4 @@ def get_letter(coord)
   $map[coord[0]][coord[1]]
 end
 
-parse_input
+parse_input('test.txt')
