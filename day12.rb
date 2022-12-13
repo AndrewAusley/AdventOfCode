@@ -5,7 +5,7 @@
 # that has already been visited and we haven't reached used fewer steps, that is an ending
 # condition. We can advance to letters valued at one-higher or any lower letter.
 
-$debug = true
+$debug = false
 def parse_input(file = 'd12.txt')
   $map = []
   start = []
@@ -19,29 +19,29 @@ def parse_input(file = 'd12.txt')
 
   visited = {}
   cost = {}
-
+  route_costs = []
   # seen = [cost, [x,y]]
   seen = [[0, start]]
 
   until seen.empty?
     node_cost, visiting = seen.shift
     if get_letter(visiting) == 'E'
-      puts "Final cost: #{node_cost}"
-      return
+      route_costs.push node_cost
     end
-
-    next if visited.include?("#{visiting[0]},#{visiting[1]}")
+    existing_cost = cost.fetch("#{visiting[0]},#{visiting[1]}", -1)
+    next if (existing_cost != -1) && existing_cost <= node_cost
     puts "#{visiting[0]}, #{visiting[1]} Letter: #{get_letter visiting} Cost: #{node_cost}" if $debug
     visited.store("#{visiting[0]},#{visiting[1]}", true)
     cost.store("#{visiting[0]},#{visiting[1]}", node_cost)
     get_neighbors(visiting).each do |node|
-      total = node_cost + 1
+      total = get_letter(node) == 'a' ? 0 : node_cost + 1
       seen.push([total, node])
     end
     # Sort not needed when cost is fixed
     # seen.sort_by { |indv_cost, _node| indv_cost }
   end
 
+  puts "Shortest path from 'a' is #{route_costs.min}"
 end
 
 def get_neighbors(node)
@@ -72,4 +72,4 @@ def get_letter(coord)
   $map[coord[0]][coord[1]]
 end
 
-parse_input('test.txt')
+parse_input
