@@ -5,7 +5,7 @@
 # that has already been visited and we haven't reached used fewer steps, that is an ending
 # condition. We can advance to letters valued at one-higher or any lower letter.
 
-$debug = false
+$debug = true
 def parse_input(file = 'd12.txt')
   $map = []
   start = []
@@ -56,10 +56,11 @@ def get_neighbors(node)
   # Filter out anything that isn't the same letter, next letter, or if letter is 'z', the end
   inbounds.filter do |e|
     # Start / Stop conditions
-    if get_letter(node) == 'z' && get_letter(e) == 'E' || get_letter(node) == 'S' && get_letter(e) == 'a'
+    if (get_letter(node) == 'z' && get_letter(e) == 'E') || (get_letter(node) == 'S' && get_letter(e) == 'a')
       true
     else
-      (get_letter(e).ord - get_letter(node).ord) <= 1
+      # If the next step is NOT 'E', the next letter can only be 1 higher or less.
+      get_letter(e) != 'E' && ((get_letter(e).ord - get_letter(node).ord) <= 1)
     end
   end
 end
